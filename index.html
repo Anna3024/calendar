@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Reggae+One&display=swap" rel="stylesheet">
+    <title>Document</title>
+    <style>
+        body {
+            background: url(background.jpg) 0 0 repeat;
+            /* background-size: cover; */
+        }
+        *{
+            font-family: 'Reggae One', cursive;
+        }
+        caption {
+            border-radius: 15px 15px 0px 0px;
+        }
+        button, select {
+            border-radius: 5px;
+            background-color: #a8d7e9;
+        }
+        td, th {
+            box-shadow: inset 0 0 6px  #95245c;
+        }
+        .backColor {
+            background-color: #a67fb8;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        let header = document.createElement('header'); //создать элемент header
+        document.body.prepend(header);
+        header.style.cssText = "display: flex; justify-content: space-around; padding: 15px" ; //стили для header
+
+        const selectMonthArr = ['Выбрать месяц','Январь', "Февраль", "Март","Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]; 
+        let selectYearArr = ['Выбрать год'];
+        for (let i=1; i<102; i++) {
+            selectYearArr[i]=1979+i; //заполнить массив с годами
+        };
+        let selectMonth = document.createElement('select');
+        header.prepend(selectMonth);
+        selectMonth.onchange = validBtn;//добавить функцию при смене значения в select
+
+        function getSelectMonthContent() {
+            let fragment = new DocumentFragment(); //создать фрагмент
+            for(let i=0; i<selectMonthArr.length; i++) {
+                let optionMonth = document.createElement('option');//для select добавить options со значениями из массива.
+                optionMonth.innerText = selectMonthArr[i]; //в option вставить текст из массива
+                optionMonth.setAttribute('value', i-1); // в атрибут value добавить значение для месяца. 0 - янв, 11-дек
+                fragment.append(optionMonth);
+            }
+            return fragment;
+        }
+        selectMonth.append(getSelectMonthContent()); //заполнить select с месяцами
+
+        let selectYear = document.createElement('select');
+        selectMonth.after(selectYear); //select с годом вставить после select с месяцем
+        selectYear.onchange = validBtn; //добавить функцию при смене значения в select
+
+        function getYearContent() {
+            let fragment = new DocumentFragment();//создать новый фрагмент
+            for(let i=0; i<selectYearArr.length; i++) {
+                let optionYear = document.createElement('option');//создать элемент option
+                optionYear.innerText = selectYearArr[i]; //в option вставить текст из массива 
+                optionYear.setAttribute('value', selectYearArr[i]);// в атрибут value добавить значение года
+                fragment.append(optionYear);
+            }
+            return fragment;
+        }
+        selectYear.append(getYearContent()); //заполнить select с годами
+
+        let btnAdd = document.createElement('button');//создать кнопку
+        selectYear.after(btnAdd);//вставить её после select с годом
+        btnAdd.innerText = 'Создать';
+        btnAdd.setAttribute("disabled","disabled");//добавить атрибут disabled
+
+        function validBtn() {
+            if (selectMonth.value!=-1 && !isNaN(selectYear.value)) {//если для месяца и года не выбрана опция "Выбрать"
+            btnAdd.removeAttribute("disabled");  //удалить атрибут disabled
+            }
+            if (selectMonth.value==-1 || isNaN(selectYear.value)) {
+            btnAdd.setAttribute("disabled","disabled");//если в годе или месяце опция "Выбрать", установить атрибут disabled
+            }
+        }
+        
+        btnAdd.addEventListener('click', createFunc);//установить слушатель событий клик на кнопку добавить
+
+        function createFunc(event) {
+            let tableDate = new Date(selectYear.value, selectMonth.value);//создать новую дату со значаниями из select
+            createNewCalendar (tableDate);
+            btnDel.removeAttribute("disabled");//из кнопки Del удалить атрибут disabled
+        }
+
+        let btnDel = document.createElement('button');//создать кнопку del
+        header.append(btnDel);
+        btnDel.innerText = 'Удалить';
+        btnDel.setAttribute("disabled","disabled");//для кнопки Del добавить атрибут disabled
+        btnDel.addEventListener('click', delFunc);
+
+        function delFunc(event) {
+           let tableArr =  document.querySelectorAll('table');//выбрать все таблицы
+           if (tableArr.length==1) { btnDel.setAttribute("disabled","disabled")} //если таблица одна, для кнопки Del добавить атрибут disabled
+           tableArr[0].remove(); //удалить первую таблицу
+        }
+
+        function createNewCalendar(anyDate) {
+            let table=document.createElement('table');
+            document.body.append(table); //добавить таблицу
+            table.style.cssText = "background-color: #6fa7da;text-align: center; margin-left: auto; margin-right: auto; margin-top: 50px; border-collapse: collapse; border: 1px solid #95245c"; //свойства для таблицы
+            
+            let caption=document.createElement('caption');
+            table.prepend(caption); //добавить заголовок к таблице
+            caption.style.cssText = "text-align: right; background-color: #95245c; padding: 10px; border: 1px solid #95245c; border-bottom: none";
+
+            let yearLeft = document.createElement('button');
+            caption.prepend(yearLeft);
+            yearLeft.innerHTML="<<";//добавить кнопку с функцией переключения года назад
+            yearLeft.style.margin = "10px";
+            yearLeft.onclick = function () {
+                anyDate.setFullYear(anyDate.getFullYear()-1); //по клику от текущего года отнять 1
+                calendar(anyDate);//переписать календарь
+            }
+
+            let monthLeft = document.createElement('button');
+            yearLeft.after(monthLeft);
+            monthLeft.innerHTML="<";//добавить кнопку с функцией переключения месяца
+            monthLeft.style.margin = "10px";
+            monthLeft.onclick = function() {
+                anyDate.setMonth(anyDate.getMonth()-1);//по клику от текущего месяца отнять 1
+                calendar(anyDate);
+            }
+
+            let span = document.createElement('span');
+            monthLeft.after(span);//span для записи месяца и года
+            span.style.cssText = "font-weight: bold; font-size: large;";
+
+            let monthRight = document.createElement('button');
+            span.after(monthRight);
+            monthRight.innerHTML=">";//добавить кнопку с функцией переключения месяца
+            monthRight.style.margin = "10px";
+            monthRight.onclick = function() {
+                anyDate.setMonth(anyDate.getMonth()+1);//по клику к текущему месяцу добавить 1
+                calendar (anyDate);
+            }
+
+            let yearRight = document.createElement('button');
+            monthRight.after(yearRight);
+            yearRight.innerHTML=">>";//добавить кнопку с функцией переключения года
+            yearRight.style.margin = "10px";
+            yearRight.onclick = function() {
+                anyDate.setFullYear(anyDate.getFullYear()+1);//по клику к текущему году добавить 1
+                calendar(anyDate);
+            }
+            
+            let tr = document.createElement('tr');
+            caption.after(tr); // добавить первый tr
+            const dayArr=['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
+            
+            function getTHContent() {
+                let fragment = new DocumentFragment();
+                for(let i=0; i<7; i++) {
+                    let th = document.createElement('th');//создать фрагмент из семи элементов th 
+                    th.append(dayArr[i]);//в каждый th записать дни недели из массива dayArr
+                    th.style.cssText = "width: 100px; padding: 15px; border: 1px solid #95245c";
+                    fragment.append(th);
+                }
+                return fragment;
+            }
+            tr.append(getTHContent()); //в tr вставить заголовки таблицы th
+
+            let tbody = document.createElement('tbody');
+            tr.after(tbody);
+
+            let months = ['январь', "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"];
+
+            calendar(anyDate);
+
+            let selectedTd;//создать переменную для смены фона TD по клику 
+            let selectedTdM; //создать переменную для смены фона TD по наведению мыши 
+
+            table.addEventListener('click', function (){//слушатель события click на таблице
+                let target = event.target; // на каком элементе вознико событие
+                if (target.tagName != 'TD' || !(target.innerText)) return;//если элемент не td или td без текста, вернуться
+                highlight(target);//запустить функцию highlight для элемента на котором возникло событие
+            })
+
+            table.addEventListener('mouseover', function (){ //слушатель события mouseover на таблице
+                let target = event.target;// на каком элементе вознико событие
+                if (target.tagName != 'TD' || !(target.innerText)) return;//если элемент не td или td без текста, вернуться
+                highlightM(target);//запустить функцию highlightM для элемента на котором возникло событие
+            })
+
+            table.addEventListener('mouseleave', function (){ //слушатель события mouseleave на таблице
+                if (selectedTdM) {//если selectedTdМ существует
+                    selectedTdM.classList.remove('backColor'); //удалить у элемента класс backColor
+                }
+            })
+
+            function highlight(td) {
+                if (selectedTd) {//если selectedTd существует
+                    selectedTd.style.backgroundColor = '';//убрать фона
+                }
+                selectedTd = td; 
+                selectedTd.style.backgroundColor = '#95245c'; //добавить фон
+            }
+
+            function highlightM(td) {
+                if (selectedTdM) {//если selectedTdМ существует
+                    selectedTdM.classList.remove('backColor'); //удалить у предыдущего элемента класс backColor
+                }
+                selectedTdM = td;
+                selectedTdM.classList.add('backColor'); //добавить текущему элементу класс backColor
+            }
+
+            function calendar (myDate) {
+                let myMonth = months[myDate.getMonth()]; // месяц
+                let date = new Date(myDate.getFullYear(), myDate.getMonth()+1, myDate.getDate()-1);
+                let n=date.getDate(); // кол-во дней в месяце
+                let DayOfWeek = (myDate.getDay()==0)?6:(myDate.getDay()-1);// день недели  0-ПН - 6-ВС
+
+                let headerTab = table.querySelector('span');
+                headerTab.innerHTML=myMonth+" "+myDate.getFullYear()+" года";
+
+                tbody.innerHTML = "";
+                let str = ""; //создать пустую строку для записи html таблицы
+                str +="<tr>";//добавить первую строку основной части таблицы
+
+                for (let i=0; i<DayOfWeek; i++) { //добавить пустые ячейки до 1 дня месяца 
+                    str+="<td></td>";
+                }
+
+                for (let i=1; i<=n; i++) {
+                    myDate.setDate(i);//изменять текущий день месяца для проверки на последний день недели;
+                    str+="<td>"+i+"</td>";
+                    if (myDate.getDay()==0) {
+                        str += (date.getDay()==0 && i==n)?"</tr>":"</tr><tr>"; //если последний день месяца это воскресенье и если записаны все дни месяца, то не добавлять новую строку для таблицы
+                    }
+                }
+
+                if (myDate.getDay()!=0) { //
+                    for (let i=myDate.getDay(); i<7; i++) {
+                    str += "<td></td>";
+                    }
+                    str += "</tr>";
+                }
+                
+                tbody.innerHTML += str; //конвертировать строку в html
+                myDate.setDate(1); //вернуть первое число месяца
+                let td = tbody.querySelectorAll('td');
+                td.forEach(function(elem) {
+                    elem.style.cssText = "padding: 15px; border: 1px solid #95245c;"
+                })
+            }
+        }   
+
+    </script>
+</body>
+</html>
